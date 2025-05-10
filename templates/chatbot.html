@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Chatbot</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        #chatbox {
+            border: 1px solid #ccc;
+            height: 400px;
+            overflow-y: scroll;
+            padding: 10px;
+            background-color: #f8f9fa;
+        }
+        .bot-msg {
+            background: #e2e3e5;
+            padding: 8px;
+            margin-bottom: 6px;
+            border-radius: 5px;
+            width: fit-content;
+        }
+        .user-msg {
+            background: #d1e7dd;
+            padding: 8px;
+            margin-bottom: 6px;
+            border-radius: 5px;
+            width: fit-content;
+            margin-left: auto;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+    <a class="navbar-brand" href="#">User Dashboard</a>
+    <div class="ms-auto">
+        <a class="btn btn-outline-light me-2" href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a class="btn btn-danger" href="{{ url_for('logout') }}">Logout</a>
+    </div>
+</nav>
+
+<!-- Chat Container -->
+<div class="container mt-5">
+    <h3 class="mb-3">AI Chatbot Assistant</h3>
+    <div id="chatbox" class="mb-3 rounded shadow-sm"></div>
+    <div class="input-group">
+        <input type="text" id="userInput" class="form-control" placeholder="Ask something..." onkeydown="if(event.key === 'Enter') sendMessage()">
+        <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<!-- Script -->
+<script>
+function sendMessage() {
+    const input = document.getElementById("userInput");
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    const chatbox = document.getElementById("chatbox");
+    chatbox.innerHTML += `<div class="user-msg"><strong>You:</strong> ${msg}</div>`;
+
+    fetch("/chatbot_api", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: msg })
+    })
+    .then(res => res.json())
+    .then(data => {
+        chatbox.innerHTML += `<div class="bot-msg"><strong>Bot:</strong> ${data.reply}</div>`;
+        chatbox.scrollTop = chatbox.scrollHeight;
+        input.value = '';
+    });
+}
+</script>
+
+</body>
+</html>
