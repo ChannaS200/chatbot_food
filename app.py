@@ -30,7 +30,7 @@ calorie_data = pd.read_excel("static/data/food_calorie_estimates.xlsx")
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = ''
-app.config['MYSQL_DB'] = 'flask_users'
+app.config['MYSQL_DB'] = 'dietdb'
 
 mysql = MySQL(app)
 
@@ -101,6 +101,23 @@ def dashboard():
         return render_template('dashboard.html', name=session['name'], email=session['email'])
     return redirect(url_for('login'))
 
+# TDEE Route
+@app.route('/tdee')
+def show_tdee():
+    if 'loggedin' not in session:
+        return redirect(url_for('login'))
+
+    cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
+    cursor.execute("SELECT * FROM medical_records WHERE user_id = %s ORDER BY created_at DESC LIMIT 1", (session['id'],))
+    record = cursor.fetchone()
+
+    if record:
+        tdee = calculate_tdee(record['gender'], record['age'], record['height_cm'], record['weight_kg'], record['activity_level'])
+        return render_template('tdee_result.html', tdee=round(tdee), goal=record['goal'])
+    else:
+        flash("No medical record found!", "warning")
+        return redirect(url_for('medical_records'))
+
 
 # Update Profile
 @app.route('/update', methods=['GET', 'POST'])
@@ -121,27 +138,56 @@ def update_profile():
 
     return render_template('update_profile.html', name=session['name'])
 #medical record
+def calculate_tdee(gender, age, height, weight, activity):
+    # Harris-Benedict BMR
+    if gender == 'Male':
+        bmr = 88.362 + (13.397 * weight) + (4.799 * height) - (5.677 * age)
+    else:
+        bmr = 447.593 + (9.247 * weight) + (3.098 * height) - (4.330 * age)
+
+    activity_factors = {
+        'Sedentary': 1.2,
+        'Lightly Active': 1.375,
+        'Moderately Active': 1.55,
+        'Very Active': 1.725,
+        'Extra Active': 1.9
+    }
+    return bmr * activity_factors.get(activity, 1.2)
+
 @app.route('/medical_records', methods=['GET', 'POST'])
 def medical_records():
     if 'loggedin' not in session:
         return redirect(url_for('login'))
 
     if request.method == 'POST':
-        diabetic = request.form['diabetic']
-        cholesterol = request.form['cholesterol']
-        pressure = request.form['pressure']
+        form = request.form
+        diabetic = form['diabetic']
+        cholesterol = form['cholesterol']
+        pressure = form['pressure']
+        age = int(form['age'])
+        gender = form['gender']
+        height = float(form['height_cm'])
+        weight = float(form['weight_kg'])
+        goal = form['goal']
+        activity = form['activity_level']
         user_id = session['id']
+
+        tdee = calculate_tdee(gender, age, height, weight, activity)
 
         cursor = mysql.connection.cursor()
         cursor.execute("""
-            INSERT INTO medical_records (user_id, diabetic_level, cholesterol_level, pressure_level)
-            VALUES (%s, %s, %s, %s)
-        """, (user_id, diabetic, cholesterol, pressure))
+            INSERT INTO medical_records (user_id, diabetic_level, cholesterol_level, pressure_level, 
+                                          age, gender, height_cm, weight_kg, goal, activity_level)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (user_id, diabetic, cholesterol, pressure, age, gender, height, weight, goal, activity))
         mysql.connection.commit()
-        flash('Medical record added successfully!', 'success')
-        return redirect(url_for('dashboard'))
+
+        session['tdee'] = round(tdee, 2)  # Save to session if needed
+        flash(f'Medical record added successfully! Your estimated TDEE is {round(tdee)} calories/day.', 'success')
+        return redirect(url_for('show_tdee'))
 
     return render_template('medical_records.html')
+
 
 #view record
 @app.route('/view_records')

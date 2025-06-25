@@ -10,7 +10,6 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-
             <div class="card shadow">
                 <div class="card-body">
                     <h4 class="card-title mb-4">Add Medical Record</h4>
@@ -24,27 +23,82 @@
                     {% endwith %}
 
                     <form method="POST">
+                        <!-- Diabetic -->
                         <div class="mb-3">
                             <label for="diabetic" class="form-label">Diabetic Level</label>
                             <input type="text" class="form-control" id="diabetic" name="diabetic" required>
                         </div>
 
+                        <!-- Cholesterol -->
                         <div class="mb-3">
                             <label for="cholesterol" class="form-label">Cholesterol Level</label>
                             <input type="text" class="form-control" id="cholesterol" name="cholesterol" required>
                         </div>
 
+                        <!-- Pressure -->
                         <div class="mb-3">
                             <label for="pressure" class="form-label">Pressure Level</label>
                             <input type="text" class="form-control" id="pressure" name="pressure" required>
                         </div>
 
-                        <button type="submit" class="btn btn-success">Save Record</button>
-                        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back</a>
+                        <!-- Age -->
+                        <div class="mb-3">
+                            <label for="age" class="form-label">Age</label>
+                            <input type="number" class="form-control" id="age" name="age" required>
+                        </div>
+
+                        <!-- Gender -->
+                        <div class="mb-3">
+                            <label for="gender" class="form-label">Gender</label>
+                            <select name="gender" id="gender" class="form-select" required>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+
+                        <!-- Height -->
+                        <div class="mb-3">
+                            <label for="height_cm" class="form-label">Height (cm)</label>
+                            <input type="number" class="form-control" id="height_cm" name="height_cm" required>
+                        </div>
+
+                        <!-- Weight -->
+                        <div class="mb-3">
+                            <label for="weight_kg" class="form-label">Weight (kg)</label>
+                            <input type="number" class="form-control" id="weight_kg" name="weight_kg" required>
+                        </div>
+
+                        <!-- Goal -->
+                        <div class="mb-3">
+                            <label for="goal" class="form-label">Goal</label>
+                            <select name="goal" id="goal" class="form-select" required>
+                                <option value="Lose Weight">Lose Weight</option>
+                                <option value="Maintain Weight">Maintain Weight</option>
+                                <option value="Gain Weight">Gain Weight</option>
+                            </select>
+                        </div>
+
+                        <!-- Activity Level -->
+                        <div class="mb-4">
+                            <label for="activity_level" class="form-label">Activity Level</label>
+                            <select name="activity_level" id="activity_level" class="form-select" required>
+                                <option value="Sedentary">Sedentary</option>
+                                <option value="Lightly Active">Lightly Active</option>
+                                <option value="Moderately Active">Moderately Active</option>
+                                <option value="Very Active">Very Active</option>
+                                <option value="Extra Active">Extra Active</option>
+                            </select>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <button type="submit" class="btn btn-success">Save Record</button>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back</a>
+                        </div>
                     </form>
+
                 </div>
             </div>
-
         </div>
     </div>
 </div>

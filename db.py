@@ -1,5 +1,5 @@
-CREATE DATABASE flask_users;
-USE flask_users;
+CREATE DATABASE dietdb;
+USE dietdb;
 
 CREATE TABLE users (
     id INT PRIMARY KEY AUTO_INCREMENT,
